@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-    types: [ opened, reopened ]
+    types: [opened, reopened, synchronize]
 
 jobs:
   build:
@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Clona o repositório completamente, necessário para PRs
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -29,6 +31,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Clona o repositório completamente
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -56,8 +60,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+
+      - name: Checkout code again for Docker
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Garantir que o código é clonado completamente para o build Docker
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          push: true
+          context: .  # Diretório de contexto para o Docker
+          file: ./Dockerfile  # Caminho para o seu Dockerfile
+          push: true  # Realiza o push para o Docker Hub
           tags: kauajuhrs/ci-example:latest
