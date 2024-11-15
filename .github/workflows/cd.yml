@@ -1,0 +1,21 @@
+Name: "exemplo de cd"
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull docker image
+        run: docker pull kauajuhrs/ci-example:latest
+
+      - name: Stop docker container
+        run: docker stop ci-example || true
+
+      - name: Remove docker container
+        run: docker rm ci-example || true
+
+      - name: Run docker container
+        run: docker run --name ci-example -d -p 8080:8080 kauajuhrs/ci-example:latest
